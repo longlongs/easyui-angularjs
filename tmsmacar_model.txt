@@ -1,0 +1,244 @@
+///<reference path="/extpb/Scripts/ExtPB_Net.js" />
+///<reference path="/itcommon/scripts/itapps_net_extpb.js" />
+///<reference path="/itcommon/scripts/itapps_net_common.js" />
+///<reference path="/itcommon/scripts/itapps_net_account.js" />
+///<reference  path="/ITCOMMON/BASE/BaseWindow.win.js" /> 
+
+//注意,需要在对象定义后面，手工增加以下代码实现对象继承
+// W_MACAR_MODEL_MAINT.prototype = new BaseWindow( ); 
+
+function W_MACAR_MODEL_MAINT() {
+
+    var self = this;
+    this.Instance = null;
+    var requestor = new PBWindow();
+    var dw_browse = new DataWindow(requestor);
+    var dw_search = new DataWindow(requestor);
+    var tb_toolbar = new ToolStrip(requestor);
+    var ddlb_print_format = new DropDownListBox(requestor);
+    var dw_sqlca = new DataWindow(requestor);
+
+    if (typeof (this.bind) == "function") var baseBind = this.bind;
+    this.bind = function (win) {
+        self.Instance = win;
+        if (typeof (baseBind) == "function") baseBind(win);
+
+        if (requestor == null) requestor = new PBWindow();
+        requestor.Attach(win);
+        if (dw_browse == null) dw_browse = new DataWindow(requestor);
+        dw_browse.Attach(win.Control("dw_browse"));
+        if (dw_search == null) dw_search = new DataWindow(requestor);
+        dw_search.Attach(win.Control("dw_search"));
+        if (tb_toolbar == null) tb_toolbar = new ToolStrip(requestor);
+        tb_toolbar.Attach(win.Control("tb_toolbar"));
+        if (ddlb_print_format == null) ddlb_print_format = new DropDownListBox(requestor);
+        ddlb_print_format.Attach(win.Control("ddlb_print_format"));
+        if (dw_sqlca == null) dw_sqlca = new DataWindow(requestor);
+        dw_sqlca.Attach(win.Control("dw_sqlca"));
+
+    }
+
+    if (typeof (this.unbind) == "function") var baseUnBind = this.unbind;
+    this.unbind = function () {
+        self.Instance = null;
+        if (typeof (this.Release) == "function") this.Release();
+        if (typeof (baseUnBind) == "function") baseUnBind();
+
+        dw_browse.Detach(); dw_browse = null;
+        dw_search.Detach(); dw_search = null;
+        tb_toolbar.Detach(); tb_toolbar = null;
+        ddlb_print_format.Detach(); ddlb_print_format = null;
+        dw_sqlca.Detach(); dw_sqlca = null;
+        requestor.Detach(); requestor = null;
+
+        setTimeout(CollectGarbage, 100);
+    }
+
+    //以上代码由设计器自动生成,请不要手工修改
+    //ExtPB.Net JavaScript End  设计器查找标志,请不要删除或修改
+
+    //#region this.GetObj = function (objName)
+    this.GetObj = function (objName) {
+        ///这个每一个窗口必须添加.
+        return eval(objName);
+    }
+    //#endregion
+
+    //#region this.Init = function ()
+    this.Init = function () {
+        ///初始化一些底层变量
+        self.yBaseVariable.zsUpdDwNameList = "dw_browse;"; //那些DW要更新.
+        self.yBaseVariable.zsTitle = "Container/CFS Size Type";
+        self.yBaseVariable.zsKeyColumnName = "model_uid"; //单表保存时的主键列名，例如unique_id
+        self.yBaseVariable.zsGenUidTableName = "tmsmacar_model";
+        self.yBaseVariable.zBSetUidAndUser = true; //js端
+    }
+    //#endregion
+
+    //#region this.DataValidation = function () 
+    this.DataValidation = function () {
+        //如果执行底层效检,就返回continue, 如果不想执行,就自己写代码,然后返回break;
+        var row = 0, count = 0, find = 0, voided = 0;
+        var model_uid = "", model_code = "", model_name = "";
+
+        dw_browse.AcceptText();
+        while (row <= dw_browse.RowCount()) {
+            row = dw_browse.GetNextModified(row, DWBUFFER.Primary);
+            if (row > 0) {
+                model_uid  = dw_browse.GetItemString(row, 'model_uid')
+                model_code = dw_browse.GetItemString(row, 'model_code')
+                model_name = dw_browse.GetItemString(row, 'model_name')
+                voided     = dw_browse.GetItemNumber(row, "voided");
+                if (voided > 0) {
+                    if (!isEmpty(model_code)) {
+                        find = dw_browse.Find("getrow() <> " + row + " and model_code ='" + model_code + "'", 1, dw_browse.RowCount());
+                        if (find > 0) {
+                            self.yMsgBox("", "Model Code [" + model_code + "] Already Exist", "", ICON.Exclamation);
+                            dw_browse.ScrollToRowEx(row, "model_code", true);
+                            return "break";
+                        }
+                        count = requestor.SelectInto("select count(*) from tmsmacar_model with(nolock) where model_uid <> '" + model_uid + "' and model_name = '" + model_name + "' and voided in(1,2,3)");
+                        if (count > 0) {
+                            self.yMsgBox("", "Model Code [" + model_code + "] Already Exist", "", ICON.Exclamation);
+                            dw_browse.ScrollToRowEx(row, "model_code", true);
+                            return "break";
+                        }
+                    }
+
+
+                    if (!isEmpty(model_name)) {
+                        find = dw_browse.Find("getrow() <> " + row + " and model_name ='" + model_name + "'", 1, dw_browse.RowCount());
+                        if (find > 0) {
+                            self.yMsgBox("", "Model Name [" + model_code + "] Already Exist", "", ICON.Exclamation);
+                            dw_browse.ScrollToRowEx(row, "model_name", true);
+                            return "break";
+                        }
+                        count = requestor.SelectInto("select count(*) from tmsmacar_model with(nolock) where model_uid <> '" + model_uid + "' and model_name = '" + model_name + "' and voided in(1,2,3)");
+                        if (count > 0) {
+                            self.yMsgBox("", "Model Name [" + model_code + "] Already Exist", "", ICON.Exclamation);
+                            dw_browse.ScrollToRowEx(row, "model_name", true);
+                            return "break";
+                        }
+                    }
+
+
+                    
+
+                } else {
+                    row = dw_browse.RowCount() + 1;
+                }
+            }
+            return "continue";
+        }
+    }
+    //#endregion
+
+    //#region this.SaveOK = function ()
+    this.SaveOK = function () {
+        return "continue";
+    }
+    //#endregion
+
+    //#region this.Open = function ()
+    this.Open = function () {
+        return "continue";
+    }
+    //#endregion
+
+    //#region this.tb_clicked_tb_toolbar = function (key, tag, sender)：工具栏响应
+    this.tb_clicked_tb_toolbar = function (key, tag, sender) {
+        ///这个是底层默认的工具栏响应. 
+        var row = 0;
+        var where = "", model_uid = "";
+
+        switch (key) {
+            case "btn_search":
+                where = self.yGetSearchWhere(dw_search);
+                dw_browse.RetrieveEx(where);
+                break;
+            case "btn_add":
+                row = dw_browse.InsertRowEx(0);
+                dw_browse.ScrollToRowEx(row, "model_code", true);
+                dw_browse.SetFocus();
+                break;
+            case "btn_save":
+                self.ySave();
+                break;
+            case "btn_delete":
+                row = dw_browse.GetRow();
+                if (row <= 0) { return; }
+                model_uid = dw_browse.GetItemString(row, "model_uid");
+                if (isEmpty(model_uid)) {
+                    dw_browse.DeleteRow(row);
+                }
+                else {
+                    dw_browse.SetItem(row, "voided", -1);
+                }
+                dw_browse.SetFocus();
+                break;
+            default:
+                break;
+        }
+    }
+    //#endregion
+
+    //#region ********翻译代码********
+    //窗口的翻译代码示例
+    this.Lang_hk = function () {
+        tb_toolbar.SetText("btn_search", "查詢");
+        tb_toolbar.SetText("btn_add", "增加");
+        tb_toolbar.SetText("btn_delete", "刪除");
+        tb_toolbar.SetText("btn_save", "保存");
+        tb_toolbar.SetText("btn_sa_tools", "SA工具");
+        tb_toolbar.SetText("btn_help", "幫助");
+    }
+    this.Lang_cn = function () {
+        tb_toolbar.SetText("btn_search", "查询");
+        tb_toolbar.SetText("btn_add", "增加");
+        tb_toolbar.SetText("btn_delete", "删除");
+        tb_toolbar.SetText("btn_save", "保存");
+        tb_toolbar.SetText("btn_sa_tools","SA工具");
+        tb_toolbar.SetText("btn_help","帮助");
+    }
+
+    //Datawindow的翻译代码示例
+    this.dw_lang_hk_dw_search = function () {
+        dw_search.Modify("model_code_t.text='型号编码:'")
+    }
+    this.dw_lang_cn_dw_search = function () {
+        dw_search.Modify("model_code_t.text='型號編碼:'")
+    }
+    this.dw_lang_hk_dw_browse = function () {
+        dw_browse.Modify("model_code_t.text = '型號編碼*'")
+        dw_browse.Modify("model_name_t.text = '型號*'")
+        dw_browse.Modify("max_kgs_t.text = '載重'")
+        dw_browse.Modify("max_cbm_t.text = '體積'")
+        dw_browse.Modify("cntr_weight_t.text = '櫃重'")
+        dw_browse.Modify("remark_t.text = '備註'")
+        dw_browse.Modify("type_t.text = '類型'")
+        dw_browse.Modify("size_type_t.text = '箱型'")
+        dw_browse.Modify("rpt_seq_t.text = '序號'")
+        dw_browse.Modify("rec_crt_user_t.text = '創建者'")
+        dw_browse.Modify("rec_crt_date_t.text = '創建日期'")
+        dw_browse.Modify("rec_upd_user_t.text = '更新者'")
+        dw_browse.Modify("rec_upd_date_t.text = '更新日期'")
+    }
+    this.dw_lang_cn_dw_browse = function () {
+        dw_browse.Modify("model_code_t.text = '型号编码*'")
+        dw_browse.Modify("model_name_t.text = '型号*'")
+        dw_browse.Modify("max_kgs_t.text = '载重'")
+        dw_browse.Modify("max_cbm_t.text = '体积'")
+        dw_browse.Modify("cntr_weight_t.text = '柜重'")
+        dw_browse.Modify("remark_t.text = '备注'")
+        dw_browse.Modify("type_t.text = '类型'")
+        dw_browse.Modify("size_type_t.text = '箱型'")
+        dw_browse.Modify("rpt_seq_t.text = '序号'")
+        dw_browse.Modify("rec_crt_user_t.text = '创建者'")
+        dw_browse.Modify("rec_crt_date_t.text = '创建日期'")
+        dw_browse.Modify("rec_upd_user_t.text = '更新者'")
+        dw_browse.Modify("rec_upd_date_t.text = '更新日期'")
+    }
+    //#endregion
+}
+
+W_MACAR_MODEL_MAINT.prototype = new BaseWindow();
